@@ -1,44 +1,46 @@
-from selene import browser, have
-import os
+from demoqa_tests.registration_page import RegistrationPage
 
 
-def test_form():
+def test_form(browser_management):
     #открытие браузера
-    browser.open('/automation-practice-form')
+    registration_page = RegistrationPage()
+    registration_page.open()
 
     #заполнение полей: Name, Email, Gender, Mobile
-    browser.element('[id=firstName]').type('Ivan')
-    browser.element('[id=lastName]').type('Ivanovich')
-    browser.element('[id=userEmail]').type('ivantest@mail.ru')
-    browser.element('[for=gender-radio-1]').click()
-    browser.element('[id=userNumber]').set('8999777666')
+    registration_page.fill_first_name('Ivan')
+    registration_page.fill_last_name('Ivanovich')
+    registration_page.fill_email('ivantest@mail.ru')
+    registration_page.fill_gender('Male')
+    registration_page.fill_mobile_phone('8999777666')
 
     #Выбор даты рождения - Date of Birth
-    browser.element('[id=dateOfBirthInput]').click()
-    browser.element('.react-datepicker__month-select').click()
-    browser.element('.react-datepicker__month-select').element('[value = "9"]').click()
-    browser.element('.react-datepicker__year-select').click()
-    browser.element('.react-datepicker__year-select').element('[value = "1995"]').click()
-    browser.element('.react-datepicker__day--013').click()
+    registration_page.fill_date('9', 'October', '1995')
 
     #заполнение полей: Subjects, Hobbies
-    browser.element('[id=subjectsInput]').type('Arts').press_enter()
-    browser.element('[for=hobbies-checkbox-3]').click()
+    registration_page.fill_subjects('Arts')
+    registration_page.fill_hobbies('Music')
 
     #загрузка файла - Picture
-    #ответ найден на https://software-testing.ru/forum/index.php?/topic/33954-selenium-zagruzka-fajla-cherez-knopku-zagruzi/
-    browser.element('[id=uploadPicture]').send_keys(os.getcwd() + '/test.png')
+    registration_page.upload_picture('test.png')
 
     #заполнение полей: Current Address, State and City
-    browser.element('[id=currentAddress]').type('Moscow')
-    browser.element('[id=react-select-3-input]').type('Haryana').press_enter()
-    browser.element('[id=react-select-4-input]').type('Panipat').press_enter()
+    registration_page.fill_address('Moscow')
+    registration_page.fill_state('Haryana')
+    registration_page.fill_city('Panipat')
 
     #нажатие на кнопку - Submit
-    browser.element('[id=submit]').press_enter()
+    registration_page.submit()
 
     #проверка результирующей таблицы
-    browser.all('tbody tr').should(have.exact_texts(
-        'Student Name Ivan Ivanovich', 'Student Email ivantest@mail.ru', 'Gender Male', 'Mobile 8999777666',
-        'Date of Birth 13 October,1995', 'Subjects Arts', 'Hobbies Music',
-        'Picture test.png', 'Address Moscow', 'State and City Haryana Panipat'))
+    registration_page.should_have_registered(
+        'Ivan Ivanovich',
+        'ivantest@mail.ru',
+        'Male',
+        '8999777666',
+        '09 October,1995',
+        'Arts',
+        'Music',
+        'test.png',
+        'Moscow',
+        'Haryana Panipat'
+    )
